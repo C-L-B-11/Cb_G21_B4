@@ -49,6 +49,7 @@
 %left '*' '/' AND
 %nonassoc UMINUS
 
+
 // workaround for handling dangling else
 // LOWER_THAN_ELSE stands for a not existing else
 %nonassoc LOWER_THAN_ELSE
@@ -57,11 +58,152 @@
 %%
 
 program:
-	// empty
-	{
+    %empty
+        {
             $$ = Value::None;
         }
+    | functiondefinition program
+    | declassignment ";" program
+    ;
 
+functiondefinition: //Check
+    type id "(" parameterlist ")" "{" statementlist "}"
+    | type id "(" ")" "{" statementlist "}"
+    ;
+
+parameterlist: //Check
+    type id 
+    | type id "," parameterlist
+    ;
+
+functioncall: //Check
+    id "(" ")"
+    | id "("  functioncallassignment  ")"
+    ;
+
+functioncallassignment: //Check
+    assignment
+    | assignment "," functioncallassignment
+    ;
+
+statementlist: //?
+    %empty
+    | block statementlist
+    ;
+
+block: //Check
+    "{" statementlist "}"
+    |	statement
+    ;
+
+statement: //Check
+    ifstatement
+    | forstatement
+    | whilestatement
+    | returnstatement ";"
+    | dowhilestatement ";"
+    | printf ";"
+    | declassignment ";"
+    | statassignment ";"
+    | functioncall ";"
+    ;
+
+/*statblock:
+    "{" statementlist "}"
+    | statement
+    ;*/
+
+ifstatement: //Fixed
+    KW_IF "(" assignment ")" block KW_ELSE block
+    | KW_IF "(" assignment ")" block LOWER_THAN_ELSE
+    ;
+
+forstatement: //Check
+    KW_FOR "(" declassignment ";" expr ";" statassignment ")" block
+    | KW_FOR "(" statassignment ";" expr ";" statassignment ")" block
+    ;
+
+dowhilestatement: //Check
+    KW_DO block KW_WHILE "(" assignment ")"
+    ;
+
+whilestatement: //Check
+    KW_WHILE "(" assignment ")" block
+    ;
+
+returnstatement: //Check
+    KW_RETURN
+    | KW_RETURN assignment
+    ;
+
+printf: //Check
+    KW_PRINTF "(" CONST_STRING ")"
+    | KW_PRINTF "(" assignment ")"
+    ;
+
+declassignment: //Check
+    type id
+    | type id "=" assignment 
+    ;
+
+type: //Check
+    KW_BOOLEAN
+    | KW_FLOAT
+    | KW_INT
+    | KW_VOID
+    ;
+
+statassignment: //Check
+    id "=" assignment
+    ;
+
+assignment:
+    id "=" assignment
+    | expr
+    ;
+
+expr:               //MAYBE
+    simpexpr
+    | simpexpr "==" simpexpr
+    | simpexpr "<" simpexpr
+    | simpexpr ">" simpexpr
+    ;
+
+simpexpr:
+    term simpexpr2
+    | "-" term simpexpr2
+    ;
+
+simpexpr2:
+    %empty
+    | "+" term simpexpr2
+    | "-" term simpexpr2
+    | "||" term simpexpr2
+    ;
+
+term:
+    factor term2
+    ;
+
+term2:
+    %empty
+    | "*" factor term2
+    | "/" factor term2
+    | "&&" factor
+    ;
+
+factor:
+    CONST_INT
+    | CONST_FLOAT
+    | CONST_BOOLEAN
+    | functioncall
+    | id //???
+    | "(" assignment ")"
+    ;
+
+id:
+    ID
+    ;
 
 %%
 
