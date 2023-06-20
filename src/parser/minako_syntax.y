@@ -1,3 +1,4 @@
+
 %expect 0
 
 %define api.parser.struct {Parser}
@@ -6,6 +7,7 @@
 
 %define parse.error custom
 %define parse.trace
+
 
 %code use {
     // all use goes here
@@ -62,50 +64,53 @@ program:
         {
             $$ = Value::None;
         }
-    | functiondefinition program
-    | declassignment ";" program
+    | functiondefinition program {$$ = Value::None;}
+    | declassignment ";" program {$$ = Value::None;}
     ;
 
 functiondefinition: //Check
-    type id "(" parameterlist ")" "{" statementlist "}"
-    | type id "(" ")" "{" statementlist "}"
+    type id "(" parameterlist ")" "{" statementlist "}" {$$ = Value::None;}
+    | type id "(" ")" "{" statementlist "}" {$$ = Value::None;}
     ;
 
 parameterlist: //Check
-    type id 
-    | type id "," parameterlist
+    type id {$$ = Value::None;}
+    | type id "," parameterlist {$$ = Value::None;}
     ;
 
 functioncall: //Check
-    id "(" ")"
-    | id "("  functioncallassignment  ")"
+    id "(" ")" {$$ = Value::None;}
+    | id "("  functioncallassignment  ")" {$$ = Value::None;}
     ;
 
 functioncallassignment: //Check
-    assignment
-    | assignment "," functioncallassignment
+    assignment {$$ = Value::None;}
+    | assignment "," functioncallassignment {$$ = Value::None;}
     ;
 
 statementlist: //?
     %empty
-    | block statementlist
+    {
+        $$ = Value::None;
+    }
+    | block statementlist {$$ = Value::None;}
     ;
 
 block: //Check
-    "{" statementlist "}"
-    |	statement
+    "{" statementlist "}" {$$ = Value::None;}
+    |	statement {$$ = Value::None;}
     ;
 
 statement: //Check
-    ifstatement
-    | forstatement
-    | whilestatement
-    | returnstatement ";"
-    | dowhilestatement ";"
-    | printf ";"
-    | declassignment ";"
-    | statassignment ";"
-    | functioncall ";"
+    ifstatement {$$ = Value::None;}
+    | forstatement {$$ = Value::None;}
+    | whilestatement {$$ = Value::None;}
+    | returnstatement ";" {$$ = Value::None;}
+    | dowhilestatement ";" {$$ = Value::None;}
+    | printf ";" {$$ = Value::None;}
+    | declassignment ";" {$$ = Value::None;}
+    | statassignment ";" {$$ = Value::None;}
+    | functioncall ";" {$$ = Value::None;}
     ;
 
 /*statblock:
@@ -114,95 +119,131 @@ statement: //Check
     ;*/
 
 ifstatement: //Fixed
-    KW_IF "(" assignment ")" block KW_ELSE block
-    | KW_IF "(" assignment ")" block LOWER_THAN_ELSE
+    KW_IF "(" assignment ")" block KW_ELSE block {$$ = Value::None;}
+    | KW_IF "(" assignment ")" block LOWER_THAN_ELSE {$$ = Value::None;}
     ;
 
 forstatement: //Check
-    KW_FOR "(" declassignment ";" expr ";" statassignment ")" block
-    | KW_FOR "(" statassignment ";" expr ";" statassignment ")" block
+    KW_FOR "(" declassignment ";" expr ";" statassignment ")" block {$$ = Value::None;}
+    | KW_FOR "(" statassignment ";" expr ";" statassignment ")" block {$$ = Value::None;}
     ;
 
 dowhilestatement: //Check
-    KW_DO block KW_WHILE "(" assignment ")"
+    KW_DO block KW_WHILE "(" assignment ")" {$$ = Value::None;}
     ;
 
 whilestatement: //Check
-    KW_WHILE "(" assignment ")" block
+    KW_WHILE "(" assignment ")" block {$$ = Value::None;}
     ;
 
 returnstatement: //Check
-    KW_RETURN
-    | KW_RETURN assignment
+    KW_RETURN {$$ = Value::None;}
+    | KW_RETURN assignment {$$ = Value::None;}
     ;
 
 printf: //Check
-    KW_PRINTF "(" CONST_STRING ")"
-    | KW_PRINTF "(" assignment ")"
+    KW_PRINTF "(" CONST_STRING ")" {$$ = Value::None;}
+    | KW_PRINTF "(" assignment ")" {$$ = Value::None;}
     ;
 
 declassignment: //Check
-    type id
-    | type id "=" assignment 
+    type id {$$ = Value::None;}
+    | type id "=" assignment {$$ = Value::None;}
     ;
 
 type: //Check
-    KW_BOOLEAN
-    | KW_FLOAT
-    | KW_INT
-    | KW_VOID
+    KW_BOOLEAN {$$ = Value::None;}
+    | KW_FLOAT {$$ = Value::None;}
+    | KW_INT {$$ = Value::None;}
+    | KW_VOID {$$ = Value::None;}
     ;
 
 statassignment: //Check
-    id "=" assignment
+    id "=" assignment {$$ = Value::None;}
     ;
 
 assignment:
-    id "=" assignment
-    | expr
+    id "=" assignment {$$ = Value::None;}
+    | expr {$$ = Value::None;}
     ;
 
-expr:               //MAYBE
+expr: 
     simpexpr
-    | simpexpr "==" simpexpr
-    | simpexpr "<" simpexpr
-    | simpexpr ">" simpexpr
+    | simpexpr "==" simpexpr {$$ = Value::None;}
+    | simpexpr "!=" simpexpr {$$ = Value::None;}
+    | simpexpr "<=" simpexpr {$$ = Value::None;}
+    | simpexpr ">="simpexpr {$$ = Value::None;}
+    | simpexpr '<' simpexpr {$$ = Value::None;}
+    | simpexpr '>' simpexpr {$$ = Value::None;}
     ;
 
 simpexpr:
-    term simpexpr2
-    | "-" term simpexpr2
+    term simpexpr2 {$$ = Value::None;}
+    | "-" term simpexpr2 {$$ = Value::None;}
     ;
 
 simpexpr2:
     %empty
-    | "+" term simpexpr2
-    | "-" term simpexpr2
-    | "||" term simpexpr2
+    | "+" term simpexpr2 {$$ = Value::None;}
+    | "-" term simpexpr2 {$$ = Value::None;}
+    | "||" term simpexpr2 {$$ = Value::None;}
     ;
 
 term:
-    factor term2
+    factor term2 {$$ = Value::None;}
     ;
 
 term2:
     %empty
-    | "*" factor term2
-    | "/" factor term2
-    | "&&" factor
+    {
+        $$ = Value::None;
+    }
+    | "*" factor term2 
+    {
+        $$ = Value::None;
+    }
+    | "/" factor term2 
+    {
+        $$ = Value::None;
+    }
+    | "&&" factor 
+    {
+        $$ = Value::None;
+    }
     ;
 
 factor:
-    CONST_INT
-    | CONST_FLOAT
-    | CONST_BOOLEAN
-    | functioncall
-    | id //???
-    | "(" assignment ")"
+    CONST_INT 
+    {
+        $$ = Value::None;
+    }
+    | CONST_FLOAT 
+    {
+        $$ = Value::None;
+    }
+    | CONST_BOOLEAN 
+    {
+        $$ = Value::None;
+    }
+    | functioncall 
+    {
+        $$ = Value::None;
+    }
+    | id 
+    {
+        $$ = Value::None;
+    }
+    | "(" assignment ")" 
+    {
+        $$ = Value::None;
+    }
     ;
 
 id:
-    ID
+    ID 
+    {
+        $$ = Value::None;
+    }
     ;
 
 %%
