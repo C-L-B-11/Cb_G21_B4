@@ -65,27 +65,27 @@ program:
             $$ = Value::None;
         }
     | functiondefinition program {$$ = Value::None;}
-    | declassignment ";" program {$$ = Value::None;}
+    | declassignment ';' program {$$ = Value::None;}
     ;
 
 functiondefinition: //Check
-    type id "(" parameterlist ")" "{" statementlist "}" {$$ = Value::None;}
-    | type id "(" ")" "{" statementlist "}" {$$ = Value::None;}
+    type id '(' parameterlist ')' '{' statementlist '}' {$$ = Value::None;}
+    | type id '(' ')' '{' statementlist '}' {$$ = Value::None;}
     ;
 
 parameterlist: //Check
     type id {$$ = Value::None;}
-    | type id "," parameterlist {$$ = Value::None;}
+    | type id ',' parameterlist {$$ = Value::None;}
     ;
 
 functioncall: //Check
-    id "(" ")" {$$ = Value::None;}
-    | id "("  functioncallassignment  ")" {$$ = Value::None;}
+    id '(' ')' {$$ = Value::None;}
+    | id '('  functioncallassignment  ')' {$$ = Value::None;}
     ;
 
 functioncallassignment: //Check
     assignment {$$ = Value::None;}
-    | assignment "," functioncallassignment {$$ = Value::None;}
+    | assignment ',' functioncallassignment {$$ = Value::None;}
     ;
 
 statementlist: //?
@@ -97,7 +97,7 @@ statementlist: //?
     ;
 
 block: //Check
-    "{" statementlist "}" {$$ = Value::None;}
+    '{' statementlist '}' {$$ = Value::None;}
     |	statement {$$ = Value::None;}
     ;
 
@@ -105,35 +105,35 @@ statement: //Check
     ifstatement {$$ = Value::None;}
     | forstatement {$$ = Value::None;}
     | whilestatement {$$ = Value::None;}
-    | returnstatement ";" {$$ = Value::None;}
-    | dowhilestatement ";" {$$ = Value::None;}
-    | printf ";" {$$ = Value::None;}
-    | declassignment ";" {$$ = Value::None;}
-    | statassignment ";" {$$ = Value::None;}
-    | functioncall ";" {$$ = Value::None;}
+    | returnstatement ';' {$$ = Value::None;}
+    | dowhilestatement ';' {$$ = Value::None;}
+    | printf ';' {$$ = Value::None;}
+    | declassignment ';' {$$ = Value::None;}
+    | statassignment ';' {$$ = Value::None;}
+    | functioncall ';' {$$ = Value::None;}
     ;
 
 /*statblock:
-    "{" statementlist "}"
+    '{' statementlist '}'
     | statement
     ;*/
 
 ifstatement: //Fixed
-    KW_IF "(" assignment ")" block KW_ELSE block {$$ = Value::None;}
-    | KW_IF "(" assignment ")" block LOWER_THAN_ELSE {$$ = Value::None;}
+    KW_IF '(' assignment ')' block KW_ELSE block {$$ = Value::None;}
+    | KW_IF '(' assignment ')' block LOWER_THAN_ELSE {$$ = Value::None;}
     ;
 
 forstatement: //Check
-    KW_FOR "(" declassignment ";" expr ";" statassignment ")" block {$$ = Value::None;}
-    | KW_FOR "(" statassignment ";" expr ";" statassignment ")" block {$$ = Value::None;}
+    KW_FOR '(' declassignment ';' expr ';' statassignment ')' block {$$ = Value::None;}
+    | KW_FOR '(' statassignment ';' expr ';' statassignment ')' block {$$ = Value::None;}
     ;
 
 dowhilestatement: //Check
-    KW_DO block KW_WHILE "(" assignment ")" {$$ = Value::None;}
+    KW_DO block KW_WHILE '(' assignment ')' {$$ = Value::None;}
     ;
 
 whilestatement: //Check
-    KW_WHILE "(" assignment ")" block {$$ = Value::None;}
+    KW_WHILE '(' assignment ')' block {$$ = Value::None;}
     ;
 
 returnstatement: //Check
@@ -142,13 +142,13 @@ returnstatement: //Check
     ;
 
 printf: //Check
-    KW_PRINTF "(" CONST_STRING ")" {$$ = Value::None;}
-    | KW_PRINTF "(" assignment ")" {$$ = Value::None;}
+    KW_PRINTF '(' CONST_STRING ')' {$$ = Value::None;}
+    | KW_PRINTF '(' assignment ')' {$$ = Value::None;}
     ;
 
 declassignment: //Check
     type id {$$ = Value::None;}
-    | type id "=" assignment {$$ = Value::None;}
+    | type id '=' assignment {$$ = Value::None;}
     ;
 
 type: //Check
@@ -159,34 +159,34 @@ type: //Check
     ;
 
 statassignment: //Check
-    id "=" assignment {$$ = Value::None;}
+    id '=' assignment {$$ = Value::None;}
     ;
 
 assignment:
-    id "=" assignment {$$ = Value::None;}
+    id '=' assignment {$$ = Value::None;}
     | expr {$$ = Value::None;}
     ;
 
 expr: 
-    simpexpr
-    | simpexpr "==" simpexpr {$$ = Value::None;}
-    | simpexpr "!=" simpexpr {$$ = Value::None;}
-    | simpexpr "<=" simpexpr {$$ = Value::None;}
-    | simpexpr ">="simpexpr {$$ = Value::None;}
-    | simpexpr '<' simpexpr {$$ = Value::None;}
-    | simpexpr '>' simpexpr {$$ = Value::None;}
+    simpexpr {$$ = Value::None;}
+    | simpexpr EQ simpexpr {$$ = Value::None;}
+    | simpexpr NEQ simpexpr {$$ = Value::None;}
+    | simpexpr LEQ simpexpr {$$ = Value::None;}
+    | simpexpr GEQ simpexpr {$$ = Value::None;}
+    | simpexpr LSS simpexpr {$$ = Value::None;}
+    | simpexpr GRT simpexpr {$$ = Value::None;}
     ;
 
 simpexpr:
     term simpexpr2 {$$ = Value::None;}
-    | "-" term simpexpr2 {$$ = Value::None;}
+    | '-' term simpexpr2 {$$ = Value::None;}
     ;
 
 simpexpr2:
-    %empty
-    | "+" term simpexpr2 {$$ = Value::None;}
-    | "-" term simpexpr2 {$$ = Value::None;}
-    | "||" term simpexpr2 {$$ = Value::None;}
+    %empty {$$ = Value::None;}
+    | '+' term simpexpr2 {$$ = Value::None;}
+    | '-' term simpexpr2 {$$ = Value::None;}
+    | OR term simpexpr2 {$$ = Value::None;}
     ;
 
 term:
@@ -198,15 +198,15 @@ term2:
     {
         $$ = Value::None;
     }
-    | "*" factor term2 
+    | '*' factor term2 
     {
         $$ = Value::None;
     }
-    | "/" factor term2 
+    | '/' factor term2 
     {
         $$ = Value::None;
     }
-    | "&&" factor 
+    | AND factor 
     {
         $$ = Value::None;
     }
@@ -233,7 +233,7 @@ factor:
     {
         $$ = Value::None;
     }
-    | "(" assignment ")" 
+    | '(' assignment ')' 
     {
         $$ = Value::None;
     }
